@@ -10,7 +10,9 @@ class ProductsController < ApplicationController
   end
 
   def create
-    data = current_user.products.create!(product_params)
+    data = { **product_params, status: 'created' }
+
+    data = current_user.products.create!(data)
     json_response(data, :created)
   end
 
@@ -19,24 +21,18 @@ class ProductsController < ApplicationController
   end
 
   def buy
-    if @product.id == current_user.id
-      json_response({message: 'You can not buy your own product'}, :created)
-    else
-      if @product.status != 'requested'
-        # @product[buyer_id] = current_user.id;
-        # @product[status] = 'requested';
-        data = {**@product, buyer_id => current_user.id, status => 'requested'};
-        p '........................'
-        p '........................'
-        p data
-        p '........................'
-        p '........................'
-        json_response
+    if @product.user_id == current_user.id
+      json_response({ message: 'You can not buy your own product' }, :created)
+    elsif @product.status == 'created'
+      data = { **product_params, status: 'pending', buyer_id: current_user.id }
+      if @product.update(data)
+        json_response(@product, :created)
       else
-        json_response({message: 'Product has already been requested for'}, :created)
+        json_response('Cannot update')
       end
+    else
+      json_response({ message: 'Product has already been requested for' }, :created)
     end
-     
   end
 
   def update
