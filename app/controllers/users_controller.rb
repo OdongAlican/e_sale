@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class UsersController < ApplicationController
-  before_action :authorized, except: %i[login]
+  before_action :authorized, except: %i[login signup]
   before_action :find_user, only: %i[update show destroy]
 
   def index
@@ -9,7 +9,7 @@ class UsersController < ApplicationController
     json_response(@users, :created)
   end
 
-  def create
+  def signup
     @user = User.create(user_params)
     if @user.save
       json_response(@user, :created)
@@ -38,7 +38,7 @@ class UsersController < ApplicationController
       data = { user: @user, token: token }
       json_response(data, :ok)
     else
-      json_response('Invalid user name or password', :unauthorized)
+      json_response({ status: 'error', message: 'Invalid Email or Password' }, :unauthorized)
     end
   end
 
