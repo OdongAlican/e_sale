@@ -5,7 +5,7 @@ class ProductsController < ApplicationController
   before_action :find_product, only: %i[update show destroy buy]
 
   def index
-    @products = Product.all.limit(10).to_json({ include: 'buyer' })
+    @products = Product.paginate(page: params[:page], per_page: 2).to_json({ include: 'buyer' })
     json_response(@products, :created)
   end
 
