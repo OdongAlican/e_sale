@@ -5,7 +5,7 @@ class ProductsController < ApplicationController
   before_action :find_product, only: %i[update show destroy buy]
 
   def index
-    @products = Product.all.limit(10)
+    @products = Product.all.limit(10).to_json({ include: 'buyer' })
     json_response(@products, :created)
   end
 
@@ -17,7 +17,8 @@ class ProductsController < ApplicationController
   end
 
   def show
-    json_response(@product, :created)
+    data = @product.to_json({ include: 'buyer' })
+    json_response(data, :created)
   end
 
   def buy
