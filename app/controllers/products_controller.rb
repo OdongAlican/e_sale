@@ -9,9 +9,23 @@ class ProductsController < ApplicationController
     json_response(@products, :created)
   end
 
+  def created_products
+    data = Product.created_products
+    json_response(data, :created)
+  end
+
+  def pending_products
+    data = Product.pending_products
+    json_response(data, :created)
+  end
+
+  def purchased_products
+    data = Product.purchased_products
+    json_response(data, :created)
+  end
+
   def create
     data = { **product_params, status: 'created' }
-
     data = current_user.products.create!(data)
     json_response(data, :created)
   end

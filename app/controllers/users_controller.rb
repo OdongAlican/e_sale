@@ -5,7 +5,7 @@ class UsersController < ApplicationController
   before_action :find_user, only: %i[update show destroy]
 
   def index
-    @users = User.all.limit(10)
+    @users = User.all.limit(10).to_json({ include: 'products' })
     json_response(@users, :created)
   end
 
