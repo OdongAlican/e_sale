@@ -5,8 +5,8 @@ Rails.application.routes.draw do
   post 'login', to: 'users#login'
   post 'signup', to: 'users#signup'
   put 'product/:id', to: 'products#buy'
-  get 'created-products', to: 'products#created_products'
-  get 'pending-products', to: 'products#pending_products'
+  get 'pending-purchases', to: 'products#pending_purchases'
+  get 'pending-sales', to: 'products#pending_sales'
   get 'purchased-products', to: 'products#purchased_products'
 
   resources :users
