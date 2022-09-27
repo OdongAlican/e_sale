@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class ProductsController < ApplicationController
-  before_action :authorized, except: %i[show]
+  before_action :authenticate_request!, except: %i[show]
   before_action :find_product, only: %i[update show destroy buy]
 
   def index

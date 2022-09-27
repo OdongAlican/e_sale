@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class UsersController < ApplicationController
-  before_action :authorized, except: %i[login signup]
+  before_action :authenticate_request!, except: %i[login signup]
   before_action :find_user, only: %i[update show destroy]
 
   def index
@@ -12,33 +12,21 @@ class UsersController < ApplicationController
   def signup
     @user = User.create(user_params)
     if @user.save
-      json_response(@user, :created)
+      render json: UserSerializer.new(@user).serializable_hash
     else
-      json_response('Can not be created', :unprocessable_entity)
+      render json: { errors: @user.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
   def show
-    json_response(@user, :created)
+    render json: UserSerializer.new(@user).serializable_hash
   end
 
   def update
     if @user.update(user_params)
-      json_response(@user, :created)
+      render json: UserSerializer.new(@user).serializable_hash
     else
       json_response('Cannot update')
-    end
-  end
-
-  def login
-    @user = User.find_by(email: params[:email])
-    password = params.permit(:password)
-    if @user && @user.password_digest == password['password']
-      token = encode_token({ user_id: @user.id })
-      data = { user: @user, token: token }
-      json_response(data, :ok)
-    else
-      json_response({ status: 'error', message: 'Invalid Email or Password' }, :unauthorized)
     end
   end
 

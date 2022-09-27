@@ -1,40 +1,40 @@
 # frozen_string_literal: true
 
 class ApplicationController < ActionController::API
+  # include ActionController::RequestForgeryProtection
   include Response
   include Password
 
-  def encode_token(payload)
-    JWT.encode(payload, 's3cr3t')
+  rescue_from ActiveRecord::RecordNotFound, with: :not_found
+  # protect_from_forgery unless: -> { request.format.json? }
+  rescue_from ActiveRecord::RecordNotDestroyed, with: :not_destroyed
+
+  def authenticate_request!
+    return invalid_authentication if !payload || !AuthenticationTokenService.valid_payload(payload.first)
+
+    current_user!
+    invalid_authentication unless @current_user
   end
 
-  def auth_header
-    request.headers['Authorization']
+  def current_user!
+    @current_user = User.find_by(id: payload[0]['user_id'])
   end
 
-  def decoded_token
-    if auth_header
-      token = auth_header.split(' ')[1]
-      begin
-        JWT.decode(token, 's3cr3t', true, algorithm: 'HS256')
-      rescue JWT::DecodeError
-        nil
-      end
-    end
+  private
+
+  def not_found
+    render json: { error: 'Not Found' }, status: :not_found
   end
 
-  def current_user
-    if decoded_token
-      user_id = decoded_token[0]['user_id']
-      @user = User.find_by(id: user_id)
-    end
+  def payload
+    auth_header = request.headers['Authorization']
+    token = auth_header.split.last
+    AuthenticationTokenService.decode(token)
+  rescue StandardError
+    nil
   end
 
-  def logged_in?
-    !!current_user
-  end
-
-  def authorized
-    render json: { message: 'Please log in' }, status: :unauthorized unless logged_in?
+  def invalid_authentication
+    render json: { error: 'You will need to login first' }, status: :unauthorized
   end
 end
