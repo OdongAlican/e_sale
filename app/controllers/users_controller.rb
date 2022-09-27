@@ -33,7 +33,7 @@ class UsersController < ApplicationController
   def login
     @user = User.find_by(email: params[:email])
     password = params.permit(:password)
-    if @user && @user.password == password['password']
+    if @user && @user.password_digest == password['password']
       token = encode_token({ user_id: @user.id })
       data = { user: @user, token: token }
       json_response(data, :ok)

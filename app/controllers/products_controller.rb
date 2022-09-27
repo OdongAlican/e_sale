@@ -5,8 +5,10 @@ class ProductsController < ApplicationController
   before_action :find_product, only: %i[update show destroy buy]
 
   def index
-    @products = Product.created_products.paginate(page: params[:page], per_page: 10).to_json({ include: 'buyer' })
-    json_response(@products, :created)
+    @products = Product.created_products.paginate(page: params[:page],
+                                                  per_page: 10).to_json({ include: 'seller' })
+
+    json_response({ products: @products, total: Product.created_products.count }, :created)
   end
 
   # Purchases
@@ -18,7 +20,7 @@ class ProductsController < ApplicationController
   end
 
   def purchased_products
-    data = Product.purchased_products(current_user).paginate(page: params[:page],
+    data = Product.purchased_products(current_user).paginate(page: params[:page], 
                                                              per_page: 10).to_json({ include: 'seller' })
     json_response(data, :created)
   end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_02_22_222615) do
+ActiveRecord::Schema.define(version: 2022_07_27_140150) do
 
   create_table "products", force: :cascade do |t|
     t.string "productname"
@@ -33,7 +33,7 @@ ActiveRecord::Schema.define(version: 2022_02_22_222615) do
     t.string "gender"
     t.boolean "admin", default: false
     t.string "email"
-    t.string "password"
+    t.string "password_digest"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
   end
