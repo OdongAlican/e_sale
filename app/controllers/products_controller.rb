@@ -14,13 +14,13 @@ class ProductsController < ApplicationController
   # Purchases
 
   def pending_purchases
-    data = Product.pending_purchases(current_user).paginate(page: params[:page],
+    data = Product.pending_purchases(current_user!).paginate(page: params[:page],
                                                             per_page: 10).to_json({ include: 'seller' })
     json_response(data, :created)
   end
 
   def purchased_products
-    data = Product.purchased_products(current_user).paginate(page: params[:page], 
+    data = Product.purchased_products(current_user!).paginate(page: params[:page], 
                                                              per_page: 10).to_json({ include: 'seller' })
     json_response(data, :created)
   end
@@ -28,12 +28,13 @@ class ProductsController < ApplicationController
   # Sales
 
   def pending_sales
-    data = Product.pending_sales(current_user).paginate(page: params[:page], per_page: 10).to_json({ include: 'buyer' })
+    data = Product.pending_sales(current_user!).paginate(page: params[:page], per_page: 10).to_json({ include: 'buyer' })
     json_response(data, :created)
   end
 
   def create
-    data = current_user.products.create!({ **product_params, status: 'created', seller_id: current_user.id })
+    data = current_user!.products.create!({ **product_params, status: 'created', 
+                                           seller_id: current_user!.id }).to_json({ include: 'seller' })
     json_response(data, :created)
   end
 
@@ -43,10 +44,10 @@ class ProductsController < ApplicationController
   end
 
   def buy
-    if @product.user_id == current_user.id
+    if @product.user_id == current_user!.id
       json_response({ message: 'You can not buy your own product' }, :created)
     elsif @product.status == 'created'
-      data = { **product_params, status: 'pending', buyer_id: current_user.id }
+      data = { **product_params, status: 'pending', buyer_id: current_user!.id }
       if @product.update(data)
         json_response(@product, :created)
       else
@@ -74,6 +75,6 @@ class ProductsController < ApplicationController
   end
 
   def product_params
-    params.require(:product).permit(:productname, :productprice)
+    params.require(:product).permit(:productname, :productprice, :image, :description, :category)
   end
 end
